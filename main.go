@@ -65,7 +65,7 @@ func run() {
 	turn := 0
 
 	cfg := pixelgl.WindowConfig{
-		Title:  "Pixel Rocks!",
+		Title:  "Let's' GO!",
 		Bounds: pixel.R(0, 0, float64(boardbounds), float64(boardbounds)),
 		VSync:  true,
 	}
