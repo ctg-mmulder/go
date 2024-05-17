@@ -36,14 +36,24 @@ func getValidMousePosition(vec pixel.Vec) pixel.Vec {
 
 func getNearestValidPosition(pos float64) float64 {
 	newPos := int(pos)
-	return float64(roundUpToNearest50(newPos))
+	return float64(RoundUpToNearest50(newPos))
 }
 
-func roundUpToNearest50(num int) int {
-	if num%50 == 0 {
-		return num
+func RoundUpToNearest50(num int) int {
+	remainder := num % 50
+	var result int
+	if remainder >= 25 {
+		result = ((num / 50) + 1) * 50
+	} else {
+		result = (num / 50) * 50
 	}
-	return ((num / 50) + 1) * 50
+	if result == 0 {
+		return 50
+	}
+	if result >= 500 {
+		return 450
+	}
+	return result
 }
 
 func checkTurn(turn int) string {
