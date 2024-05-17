@@ -37,7 +37,6 @@ func getValidMousePosition(vec pixel.Vec) pixel.Vec {
 func getNearestValidPosition(pos float64) float64 {
 	newPos := int(pos)
 	return float64(roundUpToNearest50(newPos))
-
 }
 
 func roundUpToNearest50(num int) int {
@@ -47,10 +46,23 @@ func roundUpToNearest50(num int) int {
 	return ((num / 50) + 1) * 50
 }
 
+func checkTurn(turn int) string {
+	if turn%2 == 0 {
+		return "white"
+	}
+	return "black"
+}
+
+func isWhite(turn int) bool {
+	return checkTurn(turn) == "white"
+}
+
 func run() {
 	imagesize := 50
 	boardsize := 9
 	boardbounds := 50 + imagesize*boardsize
+	// Turn tracker
+	turn := 0
 
 	cfg := pixelgl.WindowConfig{
 		Title:  "Pixel Rocks!",
@@ -63,9 +75,9 @@ func run() {
 	}
 
 	pic, err := loadPicture("cross.png")
-	//blackpic, berr := loadPicture("black-tile.png")
+	blackpic, berr := loadPicture("black-tile.png")
 	whitepic, werr := loadPicture("white-tile.png")
-	if err != nil || werr != nil {
+	if err != nil || berr != nil || werr != nil {
 		panic(err)
 	}
 
@@ -88,9 +100,19 @@ func run() {
 			tile.Draw(win, gamematrix[i])
 		}
 		if win.JustPressed(pixelgl.MouseButtonLeft) {
-			whitetile := pixel.NewSprite(whitepic, pixel.R(0, 0, 50, 50))
-			tiles = append(tiles, whitetile)
+			// TODO
+			// Check for valid turns
+			turn++
+			var pic pixel.Picture
+			if isWhite(turn) {
+				pic = whitepic
+			} else {
+				pic = blackpic
+			}
+			tile := pixel.NewSprite(pic, pixel.R(0, 0, 50, 50))
+			tiles = append(tiles, tile)
 			mouse := win.MousePosition()
+
 			gamematrix = append(gamematrix, pixel.IM.Scaled(pixel.ZV, 1).Moved(getValidMousePosition(mouse)))
 			fmt.Println(mouse)
 			fmt.Println(getValidMousePosition(mouse))
