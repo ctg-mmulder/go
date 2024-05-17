@@ -53,7 +53,7 @@ func checkTurn(turn int) string {
 	return "black"
 }
 
-func isWhite(turn int) bool {
+func IsWhite(turn int) bool {
 	return checkTurn(turn) == "white"
 }
 
@@ -104,7 +104,7 @@ func run() {
 			// Check for valid turns
 			turn++
 			var pic pixel.Picture
-			if isWhite(turn) {
+			if IsWhite(turn) {
 				pic = whitepic
 			} else {
 				pic = blackpic
