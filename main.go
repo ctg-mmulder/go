@@ -25,9 +25,13 @@ func loadPicture(path string) (pixel.Picture, error) {
 }
 
 func run() {
+	imagesize := 50
+	boardsize := 9
+	boardbounds := 50 + imagesize*boardsize
+
 	cfg := pixelgl.WindowConfig{
 		Title:  "Pixel Rocks!",
-		Bounds: pixel.R(0, 0, 1024, 768),
+		Bounds: pixel.R(0, 0, float64(boardbounds), float64(boardbounds)),
 		VSync:  true,
 	}
 	win, err := pixelgl.NewWindow(cfg)
@@ -35,18 +39,23 @@ func run() {
 		panic(err)
 	}
 
-	pic, err := loadPicture("hiking.png")
+	pic, err := loadPicture("cross.png")
 	if err != nil {
 		panic(err)
 	}
 
-	sprite := pixel.NewSprite(pic, pic.Bounds())
-
-	win.Clear(colornames.Greenyellow)
-
-	sprite.Draw(win, pixel.IM.Moved(win.Bounds().Center()))
+	cross := pixel.NewSprite(pic, pixel.R(0, 0, 50, 50))
 
 	for !win.Closed() {
+
+		win.Clear(colornames.Darkolivegreen)
+
+		for x := 50; x < boardbounds; x += 50 {
+			for y := 50; y < boardbounds; y += 50 {
+				cross.Draw(win, pixel.IM.Moved(pixel.Vec{float64(x), float64(y)}))
+			}
+		}
+
 		win.Update()
 	}
 }
