@@ -89,7 +89,10 @@ func run() {
 
 	for !win.Closed() {
 
-		win.Clear(colornames.Darkolivegreen)
+		win.Clear(colornames.Aliceblue)
+		woodBoard, _ := loadPicture("board_wood.png")
+		board := pixel.NewSprite(woodBoard, pixel.R(0, 0, float64(boardbounds), float64(boardbounds)))
+		board.Draw(win, pixel.IM.Moved(pixel.Vec{float64(boardbounds / 2), float64(boardbounds / 2)}))
 
 		for x := 50; x < boardbounds; x += 50 {
 			for y := 50; y < boardbounds; y += 50 {
