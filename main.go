@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"os"
 
@@ -24,6 +25,26 @@ func loadPicture(path string) (pixel.Picture, error) {
 		return nil, err
 	}
 	return pixel.PictureDataFromImage(img), nil
+}
+
+func getValidMousePosition(vec pixel.Vec) pixel.Vec {
+	xCor := getNearestValidPosition(vec.X)
+	yCor := getNearestValidPosition(vec.Y)
+
+	return pixel.Vec{xCor, yCor}
+}
+
+func getNearestValidPosition(pos float64) float64 {
+	newPos := int(pos)
+	return float64(roundUpToNearest50(newPos))
+
+}
+
+func roundUpToNearest50(num int) int {
+	if num%50 == 0 {
+		return num
+	}
+	return ((num / 50) + 1) * 50
 }
 
 func run() {
@@ -70,7 +91,9 @@ func run() {
 			whitetile := pixel.NewSprite(whitepic, pixel.R(0, 0, 50, 50))
 			tiles = append(tiles, whitetile)
 			mouse := win.MousePosition()
-			gamematrix = append(gamematrix, pixel.IM.Scaled(pixel.ZV, 1).Moved(mouse))
+			gamematrix = append(gamematrix, pixel.IM.Scaled(pixel.ZV, 1).Moved(getValidMousePosition(mouse)))
+			fmt.Println(mouse)
+			fmt.Println(getValidMousePosition(mouse))
 		}
 
 		win.Update()
