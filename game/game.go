@@ -2,21 +2,28 @@ package game
 
 type GameGo interface {
 	CheckTurn(counter int) Turn
-	IsWhite(game GameGo, turn int) bool
+	IsWhite() bool
+	ValidTurn()
 }
 
 type gameGo struct {
-	turn Turn
+	turn        Turn
+	turnCounter int
+}
+
+func (g *gameGo) ValidTurn() {
+	//TODO add validation
+	g.turnCounter++
 }
 
 // IsWhite function to check if the turn is white
-func (g *gameGo) IsWhite(game GameGo, turn int) bool {
-	return g.CheckTurn(turn) == White
+func (g *gameGo) IsWhite() bool {
+	return g.CheckTurn(g.turnCounter) == White
 }
 
 // NewGame creates a new instance of Board
 func NewGame() GameGo {
-	return &gameGo{turn: White}
+	return &gameGo{turn: White, turnCounter: 0}
 }
 
 // Define a new type called Turn
