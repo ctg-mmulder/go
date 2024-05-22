@@ -19,6 +19,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
 )
+
 replace github.com/go-go/game => ./game
 replace github.com/go-go/game/graphics => ./game/graphics
 replace github.com/go-go/game/models => ./game/models

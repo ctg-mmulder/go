@@ -2,10 +2,16 @@ package game
 
 type GameGo interface {
 	CheckTurn(counter int) Turn
+	IsWhite(game GameGo, turn int) bool
 }
 
 type gameGo struct {
 	turn Turn
+}
+
+// IsWhite function to check if the turn is white
+func (g *gameGo) IsWhite(game GameGo, turn int) bool {
+	return g.CheckTurn(turn) == White
 }
 
 // NewGame creates a new instance of Board
@@ -21,11 +27,6 @@ const (
 	White Turn = iota
 	Black
 )
-
-// IsWhite function to check if the turn is white
-func IsWhite(g GameGo, counter int) bool {
-	return g.CheckTurn(counter) == White
-}
 
 func (g *gameGo) CheckTurn(counter int) Turn {
 	if counter%2 == 0 {
