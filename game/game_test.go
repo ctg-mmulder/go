@@ -1,4 +1,4 @@
-package models
+package game
 
 import (
 	"reflect"
@@ -7,7 +7,7 @@ import (
 
 func TestIsWhite(t *testing.T) {
 	type args struct {
-		b       Board
+		b       GameGo
 		counter int
 	}
 	tests := []struct {
@@ -18,30 +18,30 @@ func TestIsWhite(t *testing.T) {
 		{
 			name: "Test White Turn",
 			args: args{
-				b:       &board{}, // Simulate a board
-				counter: 0,        // Simulate the first move (even counter)
+				b:       &gameGo{}, // Simulate a gameGo
+				counter: 0,         // Simulate the first move (even counter)
 			},
 			want: true,
 		},
 		{
 			name: "Test Black Turn",
 			args: args{
-				b:       &board{}, // Simulate a board
-				counter: 1,        // Simulate the second move (odd counter)
+				b:       &gameGo{}, // Simulate a gameGo
+				counter: 1,         // Simulate the second move (odd counter)
 			},
 			want: false,
 		}, {
 			name: "Test Black Turn after 35 moves",
 			args: args{
-				b:       &board{}, // Simulate a board
-				counter: 35,       // Simulate the second move (odd counter)
+				b:       &gameGo{}, // Simulate a gameGo
+				counter: 35,        // Simulate the second move (odd counter)
 			},
 			want: false,
 		}, {
 			name: "Test White Turn after 100 moves",
 			args: args{
-				b:       &board{}, // Simulate a board
-				counter: 100,      // Simulate the second move (odd counter)
+				b:       &gameGo{}, // Simulate a gameGo
+				counter: 100,       // Simulate the second move (odd counter)
 			},
 			want: true,
 		},
@@ -59,22 +59,22 @@ func TestIsWhite(t *testing.T) {
 func TestNewBoard(t *testing.T) {
 	tests := []struct {
 		name string
-		want Board
+		want GameGo
 	}{
-		{name: "Test new board",
-			want: &board{},
+		{name: "Test new gameGo",
+			want: &gameGo{},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewBoard(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewBoard() = %v, want %v", got, tt.want)
+			if got := NewGame(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewGame() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_board_CheckTurn(t *testing.T) {
+func Test_gameGo_CheckTurn(t *testing.T) {
 	type fields struct {
 		turn Turn
 	}
@@ -95,7 +95,7 @@ func Test_board_CheckTurn(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			b := &board{
+			b := &gameGo{
 				turn: tt.fields.turn,
 			}
 			if got := b.CheckTurn(tt.args.counter); got != tt.want {

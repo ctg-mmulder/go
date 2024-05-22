@@ -2,29 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/go-go/models"
-	"image"
-	"os"
-
+	"github.com/go-go/game"
+	"github.com/go-go/game/graphics"
 	_ "image/png"
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"golang.org/x/image/colornames"
 )
-
-func loadPicture(path string) (pixel.Picture, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	img, _, err := image.Decode(file)
-	if err != nil {
-		return nil, err
-	}
-	return pixel.PictureDataFromImage(img), nil
-}
 
 func getValidMousePosition(vec pixel.Vec) pixel.Vec {
 	xCor := getNearestValidPosition(vec.X)
@@ -60,7 +45,7 @@ func run() {
 	boardsize := 9
 	boardbounds := 50 + imagesize*boardsize
 	// Turn tracker
-	var b models.Board = models.NewBoard()
+	var b game.GameGo = game.NewGame()
 	turn := 0
 
 	cfg := pixelgl.WindowConfig{
@@ -73,9 +58,9 @@ func run() {
 		panic(err)
 	}
 
-	pic, err := loadPicture("cross.png")
-	blackpic, berr := loadPicture("black-tile.png")
-	whitepic, werr := loadPicture("white-tile.png")
+	pic, err := graphics.LoadPicture("cross.png")
+	blackpic, berr := graphics.LoadPicture("black-tile.png")
+	whitepic, werr := graphics.LoadPicture("white-tile.png")
 	if err != nil || berr != nil || werr != nil {
 		panic(err)
 	}
@@ -89,7 +74,7 @@ func run() {
 	for !win.Closed() {
 
 		win.Clear(colornames.Aliceblue)
-		woodBoard, _ := loadPicture("board_wood.png")
+		woodBoard, _ := graphics.LoadPicture("board_wood.png")
 		board := pixel.NewSprite(woodBoard, pixel.R(0, 0, float64(boardbounds), float64(boardbounds)))
 		board.Draw(win, pixel.IM.Moved(pixel.Vec{float64(boardbounds / 2), float64(boardbounds / 2)}))
 
@@ -106,7 +91,7 @@ func run() {
 			// Check for valid turns
 			turn++
 			var pic pixel.Picture
-			if models.IsWhite(b, turn) {
+			if game.IsWhite(b, turn) {
 				pic = whitepic
 			} else {
 				pic = blackpic
