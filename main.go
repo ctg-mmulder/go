@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-go/models"
 	"image"
 	"os"
 
@@ -11,8 +12,6 @@ import (
 	"github.com/faiface/pixel/pixelgl"
 	"golang.org/x/image/colornames"
 )
-
-type board struct{}
 
 func loadPicture(path string) (pixel.Picture, error) {
 	file, err := os.Open(path)
@@ -56,22 +55,12 @@ func RoundUpToNearest50(num int) int {
 	return result
 }
 
-func checkTurn(turn int) string {
-	if turn%2 == 0 {
-		return "white"
-	}
-	return "black"
-}
-
-func IsWhite(turn int) bool {
-	return checkTurn(turn) == "white"
-}
-
 func run() {
 	imagesize := 50
 	boardsize := 9
 	boardbounds := 50 + imagesize*boardsize
 	// Turn tracker
+	var b models.Board = models.NewBoard()
 	turn := 0
 
 	cfg := pixelgl.WindowConfig{
@@ -117,7 +106,7 @@ func run() {
 			// Check for valid turns
 			turn++
 			var pic pixel.Picture
-			if IsWhite(turn) {
+			if models.IsWhite(b, turn) {
 				pic = whitepic
 			} else {
 				pic = blackpic
