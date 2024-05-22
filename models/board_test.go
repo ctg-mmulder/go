@@ -86,8 +86,12 @@ func Test_board_CheckTurn(t *testing.T) {
 		fields fields
 		args   args
 		want   Turn
-	}{
-		// TODO: Add test cases.
+	}{{
+		name:   "test_CheckTurn",
+		fields: fields{turn: Black},
+		args:   args{counter: 10},
+		want:   White,
+	},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
