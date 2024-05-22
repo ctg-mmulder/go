@@ -58,9 +58,9 @@ func run() {
 		panic(err)
 	}
 
-	pic, err := graphics.LoadPicture("cross.png")
-	blackpic, berr := graphics.LoadPicture("black-tile.png")
-	whitepic, werr := graphics.LoadPicture("white-tile.png")
+	pic, err := graphics.LoadPicture("./game/graphics/cross.png")
+	blackpic, berr := graphics.LoadPicture("./game/graphics/black-tile.png")
+	whitepic, werr := graphics.LoadPicture("./game/graphics/white-tile.png")
 	if err != nil || berr != nil || werr != nil {
 		panic(err)
 	}
@@ -74,7 +74,7 @@ func run() {
 	for !win.Closed() {
 
 		win.Clear(colornames.Aliceblue)
-		woodBoard, _ := graphics.LoadPicture("board_wood.png")
+		woodBoard, _ := graphics.LoadPicture("./game/graphics/board_wood.png")
 		board := pixel.NewSprite(woodBoard, pixel.R(0, 0, float64(boardbounds), float64(boardbounds)))
 		board.Draw(win, pixel.IM.Moved(pixel.Vec{float64(boardbounds / 2), float64(boardbounds / 2)}))
 

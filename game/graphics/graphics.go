@@ -2,6 +2,7 @@ package graphics
 
 import (
 	"image"
+	_ "image/png"
 	"os"
 
 	"github.com/faiface/pixel"

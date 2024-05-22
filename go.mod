@@ -5,6 +5,9 @@ go 1.22.3
 require (
 	github.com/faiface/pixel v0.10.0
 	golang.org/x/image v0.13.0
+	  github.com/go-go/game v0.0.0
+        github.com/go-go/game/graphics v0.0.0
+        github.com/go-go/game/models v0.0.0
 )
 
 require (
@@ -16,3 +19,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
 )
+replace github.com/go-go/game => ./game
+replace github.com/go-go/game/graphics => ./game/graphics
+replace github.com/go-go/game/models => ./game/models
