@@ -13,10 +13,12 @@ import (
 )
 
 type Graphics interface {
-	Imagesize() int
+	Imagesize() (float64, int)
 	Boardsize() int
 	Bounds() int
 	Run()
+	NearestValidPosition(float64) float64
+	ValidMousePosition(pixel.Vec) pixel.Vec
 }
 
 type graphics struct {
@@ -24,33 +26,38 @@ type graphics struct {
 	boardsize int
 }
 
+// NewGraphics creates a new instance of Board
+func NewGraphics(imagesize int, boardsize int) Graphics {
+	return &graphics{imagesize: imagesize, boardsize: boardsize}
+}
+
 func (g graphics) Run() {
 	var newGame game.GameGo = game.NewGame()
 	turn := 0
-	win, err := NewWindowGo(g)
+	win, err := newWindowGo(g)
+	imgFloatSize, imgIntSize := g.Imagesize()
 
-	pic, err := LoadPicture("./game/graphics/cross.png")
-	blackpic, berr := LoadPicture("./game/graphics/black-tile.png")
-	whitepic, werr := LoadPicture("./game/graphics/white-tile.png")
+	pic, err := loadPicture("./game/graphics/cross.png")
+	blackpic, berr := loadPicture("./game/graphics/black-tile.png")
+	whitepic, werr := loadPicture("./game/graphics/white-tile.png")
 	if err != nil || berr != nil || werr != nil {
 		panic(err)
 	}
 
-	cross := pixel.NewSprite(pic, pixel.R(0, 0, 50, 50))
+	cross := pixel.NewSprite(pic, pixel.R(0, 0, imgFloatSize, imgFloatSize))
 
-	//blacktile := pixel.NewSprite(blackpic, pixel.R(0, 0, 50, 50))
+	//blacktile := pixel.NewSprite(blackpic, pixel.R(0, 0, g.Imagesize(), g.Imagesize()))
 	var gamematrix []pixel.Matrix
 	var tiles []*pixel.Sprite
 
 	for !win.Closed() {
-
 		win.Clear(colornames.Aliceblue)
-		woodBoard, _ := LoadPicture("./game/graphics/board_wood.png")
+		woodBoard, _ := loadPicture("./game/graphics/board_wood.png")
 		board := pixel.NewSprite(woodBoard, pixel.R(0, 0, float64(g.Bounds()), float64(g.Bounds())))
 		board.Draw(win, pixel.IM.Moved(pixel.Vec{float64(g.Bounds() / 2), float64(g.Bounds() / 2)}))
 
-		for x := 50; x < g.Bounds(); x += 50 {
-			for y := 50; y < g.Bounds(); y += 50 {
+		for x := imgIntSize; x < g.Bounds(); x += imgIntSize {
+			for y := imgIntSize; y < g.Bounds(); y += imgIntSize {
 				cross.Draw(win, pixel.IM.Moved(pixel.Vec{float64(x), float64(y)}))
 			}
 		}
@@ -67,21 +74,43 @@ func (g graphics) Run() {
 			} else {
 				pic = blackpic
 			}
-			tile := pixel.NewSprite(pic, pixel.R(0, 0, 50, 50))
+			tile := pixel.NewSprite(pic, pixel.R(0, 0, imgFloatSize, imgFloatSize))
 			tiles = append(tiles, tile)
 			mouse := win.MousePosition()
 
-			gamematrix = append(gamematrix, pixel.IM.Scaled(pixel.ZV, 1).Moved(getValidMousePosition(mouse)))
+			gamematrix = append(gamematrix, pixel.IM.Scaled(pixel.ZV, 1).Moved(g.ValidMousePosition(mouse)))
 			fmt.Println(mouse)
-			fmt.Println(getValidMousePosition(mouse))
+			fmt.Println(g.ValidMousePosition(mouse))
 		}
 
 		win.Update()
 	}
 }
 
-func (g graphics) Imagesize() int {
-	return g.imagesize
+func (g graphics) NearestValidPosition(pos float64) float64 {
+	return float64(g.roundUpToNearestImageSize(int(pos)))
+
+}
+
+func (g graphics) roundUpToNearestImageSize(num int) int {
+	remainder := num % g.imagesize
+	var result int
+	if remainder >= g.imagesize/2 {
+		result = ((num / g.imagesize) + 1) * g.imagesize
+	} else {
+		result = (num / g.imagesize) * g.imagesize
+	}
+	if result == 0 {
+		return g.imagesize
+	}
+	if result >= g.imagesize*g.boardsize+g.imagesize {
+		return g.imagesize * g.boardsize
+	}
+	return result
+}
+
+func (g graphics) Imagesize() (float64, int) {
+	return float64(g.imagesize), g.imagesize
 }
 
 func (g graphics) Boardsize() int {
@@ -89,15 +118,10 @@ func (g graphics) Boardsize() int {
 }
 
 func (g graphics) Bounds() int {
-	return 50 + g.imagesize*g.boardsize
+	return g.imagesize + g.imagesize*g.boardsize
 }
 
-// NewGraphics creates a new instance of Board
-func NewGraphics() Graphics {
-	return &graphics{imagesize: 50, boardsize: 9}
-}
-
-func LoadPicture(path string) (pixel.Picture, error) {
+func loadPicture(path string) (pixel.Picture, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -110,7 +134,7 @@ func LoadPicture(path string) (pixel.Picture, error) {
 	return pixel.PictureDataFromImage(img), nil
 }
 
-func NewWindowGo(graphics Graphics) (*pixelgl.Window, error) {
+func newWindowGo(graphics Graphics) (*pixelgl.Window, error) {
 	cfg := windowConfigGo(graphics)
 	win, err := pixelgl.NewWindow(cfg)
 	if err != nil {
@@ -118,6 +142,7 @@ func NewWindowGo(graphics Graphics) (*pixelgl.Window, error) {
 	}
 	return win, err
 }
+
 func windowConfigGo(graphics Graphics) pixelgl.WindowConfig {
 	return pixelgl.WindowConfig{
 		Title:  "Let's GO!",
@@ -126,31 +151,9 @@ func windowConfigGo(graphics Graphics) pixelgl.WindowConfig {
 	}
 }
 
-func getValidMousePosition(vec pixel.Vec) pixel.Vec {
-	xCor := getNearestValidPosition(vec.X)
-	yCor := getNearestValidPosition(vec.Y)
+func (g graphics) ValidMousePosition(vec pixel.Vec) pixel.Vec {
+	xCor := g.NearestValidPosition(vec.X)
+	yCor := g.NearestValidPosition(vec.Y)
 
 	return pixel.Vec{xCor, yCor}
-}
-
-func getNearestValidPosition(pos float64) float64 {
-	newPos := int(pos)
-	return float64(RoundUpToNearest50(newPos))
-}
-
-func RoundUpToNearest50(num int) int {
-	remainder := num % 50
-	var result int
-	if remainder >= 25 {
-		result = ((num / 50) + 1) * 50
-	} else {
-		result = (num / 50) * 50
-	}
-	if result == 0 {
-		return 50
-	}
-	if result >= 500 {
-		return 450
-	}
-	return result
 }

@@ -9,6 +9,6 @@ import (
 
 func main() {
 	pixelgl.Run(func() {
-		graphics.NewGraphics().Run()
+		graphics.NewGraphics(50, 9).Run()
 	})
 }
