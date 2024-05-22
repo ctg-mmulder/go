@@ -1,9 +1,9 @@
 package game
 
 type GameGo interface {
-	CheckTurn(counter int) Turn
-	IsWhite() bool
-	ValidTurn()
+	CheckTurn() Turn
+	IsWhiteTurn() bool
+	UpdateTurnCounter()
 }
 
 type gameGo struct {
@@ -11,14 +11,14 @@ type gameGo struct {
 	turnCounter int
 }
 
-func (g *gameGo) ValidTurn() {
+func (g *gameGo) UpdateTurnCounter() {
 	//TODO add validation
 	g.turnCounter++
 }
 
 // IsWhite function to check if the turn is white
-func (g *gameGo) IsWhite() bool {
-	return g.CheckTurn(g.turnCounter) == White
+func (g *gameGo) IsWhiteTurn() bool {
+	return g.CheckTurn() == White
 }
 
 // NewGame creates a new instance of Board
@@ -35,8 +35,8 @@ const (
 	Black
 )
 
-func (g *gameGo) CheckTurn(counter int) Turn {
-	if counter%2 == 0 {
+func (g *gameGo) CheckTurn() Turn {
+	if g.turnCounter%2 == 0 {
 		g.turn = White
 	} else {
 		g.turn = Black

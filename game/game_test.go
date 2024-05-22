@@ -6,51 +6,44 @@ import (
 )
 
 func TestIsWhite(t *testing.T) {
-	type args struct {
-		b       GameGo
-		counter int
-	}
 	tests := []struct {
-		name string
-		args args
-		want bool
+		name  string
+		game  GameGo
+		plays int
+		want  bool
 	}{
 		{
-			name: "Test White Turn",
-			args: args{
-				b:       &gameGo{}, // Simulate a gameGo
-				counter: 0,         // Simulate the first move (even counter)
-			},
-			want: true,
+			name:  "first play Black Turn ",
+			game:  NewGame(),
+			plays: 1,
+			want:  false,
 		},
 		{
-			name: "Test Black Turn",
-			args: args{
-				b:       &gameGo{}, // Simulate a gameGo
-				counter: 1,         // Simulate the second move (odd counter)
-			},
-			want: false,
-		}, {
-			name: "Test Black Turn after 35 moves",
-			args: args{
-				b:       &gameGo{}, // Simulate a gameGo
-				counter: 35,        // Simulate the second move (odd counter)
-			},
-			want: false,
-		}, {
-			name: "Test White Turn after 100 moves",
-			args: args{
-				b:       &gameGo{}, // Simulate a gameGo
-				counter: 100,       // Simulate the second move (odd counter)
-			},
-			want: true,
+			name:  "Second Play White Turn",
+			game:  NewGame(),
+			plays: 2,
+			want:  true,
 		},
-		// Add more test cases as needed
+		{
+			name:  "third play Black Turn ",
+			game:  NewGame(),
+			plays: 101,
+			want:  false,
+		},
+		{
+			name:  "Fourth Play White Turn",
+			game:  NewGame(),
+			plays: 36,
+			want:  true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewGame().IsWhite(tt.args.b, tt.args.counter); got != tt.want {
-				t.Errorf("IsWhite() = %v, want %v", got, tt.want)
+			for i := 0; i < tt.plays; i++ {
+				tt.game.UpdateTurnCounter()
+			}
+			if got := tt.game.IsWhiteTurn(); got != tt.want {
+				t.Errorf("IsWhiteTurn() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -98,7 +91,10 @@ func Test_gameGo_CheckTurn(t *testing.T) {
 			b := &gameGo{
 				turn: tt.fields.turn,
 			}
-			if got := b.CheckTurn(tt.args.counter); got != tt.want {
+			for i := 0; i < tt.args.counter; i++ {
+				b.UpdateTurnCounter()
+			}
+			if got := b.CheckTurn(); got != tt.want {
 				t.Errorf("CheckTurn() = %v, want %v", got, tt.want)
 			}
 		})

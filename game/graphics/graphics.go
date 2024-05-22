@@ -32,29 +32,31 @@ func NewGraphics(imagesize int, boardsize int) Graphics {
 }
 
 func (g graphics) Run() {
-	newGame := game.NewGame()
+	game := game.NewGame()
 	win := newWindowGo(g)
 	var gamematrix []pixel.Matrix
 	var tiles []*pixel.Sprite
 
 	for !win.Closed() {
 		win.Clear(colornames.Aliceblue)
-		g.createBoardBackGround(win)
+		g.drawBoardBackGround(win)
 		g.drawCrossesOnBoard(win)
 		g.drawPlayedTiles(tiles, win, gamematrix)
 
 		if win.JustPressed(pixelgl.MouseButtonLeft) {
-			newGame.ValidTurn()
-			tiles = append(tiles, g.createTile(newGame))
-			mouse := win.MousePosition()
-
-			gamematrix = append(gamematrix, pixel.IM.Scaled(pixel.ZV, 1).Moved(g.ValidMousePosition(mouse)))
-			fmt.Println(mouse)
-			fmt.Println(g.ValidMousePosition(mouse))
+			game.UpdateTurnCounter()
+			tiles = append(tiles, g.createTile(game))
+			gamematrix = append(gamematrix, g.getMousePixelMatrix(win.MousePosition()))
 		}
 
 		win.Update()
 	}
+}
+
+func (g graphics) getMousePixelMatrix(mousePosition pixel.Vec) pixel.Matrix {
+	fmt.Println(mousePosition)
+	fmt.Println(g.ValidMousePosition(mousePosition))
+	return pixel.IM.Scaled(pixel.ZV, 1).Moved(g.ValidMousePosition(mousePosition))
 }
 
 func (g graphics) drawPlayedTiles(tiles []*pixel.Sprite, win *pixelgl.Window, gamematrix []pixel.Matrix) {
@@ -79,7 +81,7 @@ func (g graphics) drawCrossesOnBoard(win *pixelgl.Window) {
 	}
 }
 
-func (g graphics) createBoardBackGround(win *pixelgl.Window) {
+func (g graphics) drawBoardBackGround(win *pixelgl.Window) {
 	woodBoard, _ := loadPicture("./game/graphics/board_wood.png")
 	board := pixel.NewSprite(woodBoard, pixel.R(0, 0, float64(g.Bounds()), float64(g.Bounds())))
 	board.Draw(win, pixel.IM.Moved(pixel.Vec{float64(g.Bounds() / 2), float64(g.Bounds() / 2)}))
@@ -95,7 +97,7 @@ func (g graphics) getColorForTurn(newGame game.GameGo) pixel.Picture {
 		panic(werr)
 	}
 	var pic pixel.Picture
-	if newGame.IsWhite() {
+	if newGame.IsWhiteTurn() {
 		pic = whitepic
 	} else {
 		pic = blackpic
