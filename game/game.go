@@ -1,5 +1,9 @@
 package game
 
+import (
+	"github.com/go-go/game/models"
+)
+
 type GameGo interface {
 	CheckTurn() Turn
 	IsWhiteTurn() bool
@@ -9,6 +13,7 @@ type GameGo interface {
 type gameGo struct {
 	turn        Turn
 	turnCounter int
+	intersects  []models.Intersect
 }
 
 func (g *gameGo) UpdateTurnCounter() {
@@ -23,7 +28,21 @@ func (g *gameGo) IsWhiteTurn() bool {
 
 // NewGame creates a new instance of Board
 func NewGame() GameGo {
-	return &gameGo{turn: White, turnCounter: 0}
+	return &gameGo{turn: White, turnCounter: 0, intersects: createIntersects()}
+}
+
+func createIntersects() []models.Intersect {
+	var intersects []models.Intersect
+	for x := 1; x < 10; x++ {
+		for y := 1; y < 10; y++ {
+			intersect := models.Intersect{
+				Location: models.Location{X: float64(x * 50), Y: float64(y * 50)},
+				State:    models.Free,
+			}
+			intersects = append(intersects, intersect)
+		}
+	}
+	return intersects
 }
 
 // Define a new type called Turn
