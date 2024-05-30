@@ -1,7 +1,6 @@
 package graphics
 
 import (
-	"fmt"
 	"github.com/faiface/pixel/pixelgl"
 	"github.com/go-go/game"
 	"image"
@@ -44,9 +43,10 @@ func (g graphics) Run() {
 		g.drawPlayedTiles(tiles, win, gamematrix)
 
 		if win.JustPressed(pixelgl.MouseButtonLeft) {
-			game.UpdateTurnCounter()
+			mousePosition := g.ValidMousePosition(win.MousePosition())
+			game.PlayTile(mousePosition.X, mousePosition.Y)
 			tiles = append(tiles, g.createTile(game))
-			gamematrix = append(gamematrix, g.getMousePixelMatrix(win.MousePosition()))
+			gamematrix = append(gamematrix, g.getMousePixelMatrix(g.ValidMousePosition(mousePosition)))
 		}
 
 		win.Update()
@@ -54,9 +54,7 @@ func (g graphics) Run() {
 }
 
 func (g graphics) getMousePixelMatrix(mousePosition pixel.Vec) pixel.Matrix {
-	fmt.Println(mousePosition)
-	fmt.Println(g.ValidMousePosition(mousePosition))
-	return pixel.IM.Scaled(pixel.ZV, 1).Moved(g.ValidMousePosition(mousePosition))
+	return pixel.IM.Scaled(pixel.ZV, 1).Moved(mousePosition)
 }
 
 func (g graphics) drawPlayedTiles(tiles []*pixel.Sprite, win *pixelgl.Window, gamematrix []pixel.Matrix) {

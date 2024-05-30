@@ -1,13 +1,16 @@
 package game
 
 import (
-	"github.com/go-go/game/models"
+	models "github.com/go-go/game/models"
 )
 
 type GameGo interface {
 	CheckTurn() Turn
 	IsWhiteTurn() bool
-	UpdateTurnCounter()
+	PlayTile(x float64, y float64)
+	TurnCounter() int
+	IntersectState(x float64, y float64) models.State
+	SetCounter(turncounter int)
 }
 
 type gameGo struct {
@@ -16,9 +19,49 @@ type gameGo struct {
 	intersects  []models.Intersect
 }
 
-func (g *gameGo) UpdateTurnCounter() {
-	//TODO add validation
-	g.turnCounter++
+func (g *gameGo) SetCounter(turncounter int) {
+	g.turnCounter = turncounter
+}
+
+func (g *gameGo) TurnCounter() int {
+	return g.turnCounter
+}
+
+func (g *gameGo) IntersectState(x float64, y float64) models.State {
+	intersect, err := g.findIntersect(x, y)
+	if err == nil {
+		return intersect.State
+	}
+	panic("No intersect found")
+}
+
+func (g *gameGo) PlayTile(x float64, y float64) {
+	turn := g.CheckTurn()
+	intersect, err := g.findIntersect(x, y)
+	if err == nil {
+		g.turnCounter++
+		intersect.UpdateState(toState(turn))
+	}
+}
+
+func toState(turn Turn) models.State {
+	if turn == White {
+		return models.White
+	}
+	return models.Black
+}
+
+func (g *gameGo) findIntersect(x float64, y float64) (*models.Intersect, error) {
+	for i := range g.intersects {
+		if g.intersects[i].IsXY(x, y) {
+			return &g.intersects[i], nil
+		}
+	}
+	panic("not valid play")
+}
+
+func (g *gameGo) isFreeIntersect(intersect models.Intersect) bool {
+	return intersect.State == models.Free
 }
 
 // IsWhite function to check if the turn is white
