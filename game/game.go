@@ -1,13 +1,14 @@
 package game
 
 import (
+	"errors"
 	models "github.com/go-go/game/models"
 )
 
 type GameGo interface {
 	CheckTurn() Turn
 	IsWhiteTurn() bool
-	PlayTile(x float64, y float64)
+	PlayTile(x float64, y float64) error
 	TurnCounter() int
 	IntersectState(x float64, y float64) models.State
 	SetCounter(turncounter int)
@@ -35,13 +36,20 @@ func (g *gameGo) IntersectState(x float64, y float64) models.State {
 	panic("No intersect found")
 }
 
-func (g *gameGo) PlayTile(x float64, y float64) {
+func (g *gameGo) PlayTile(x float64, y float64) error {
 	turn := g.CheckTurn()
 	intersect, err := g.findIntersect(x, y)
+
 	if err == nil {
-		g.turnCounter++
-		intersect.UpdateState(toState(turn))
+		if g.ValidPlay(intersect) {
+			g.turnCounter++
+			intersect.UpdateState(toState(turn))
+		} else {
+			return errors.New("invalid play")
+		}
 	}
+	return nil
+
 }
 
 func toState(turn Turn) models.State {
@@ -104,4 +112,7 @@ func (g *gameGo) CheckTurn() Turn {
 		g.turn = Black
 	}
 	return g.turn
+}
+func (g *gameGo) ValidPlay(intersect *models.Intersect) bool {
+	return intersect.State == 0
 }

@@ -1,14 +1,20 @@
 package graphics
 
 import (
+	"context"
 	"github.com/faiface/pixel/pixelgl"
 	"github.com/go-go/game"
 	"image"
 	_ "image/png"
 	"os"
 
+	"fmt"
 	"github.com/faiface/pixel"
+	"github.com/faiface/pixel/imdraw"
+	"github.com/faiface/pixel/text"
 	"golang.org/x/image/colornames"
+	"golang.org/x/image/font/basicfont"
+	"time"
 )
 
 type Graphics interface {
@@ -35,16 +41,36 @@ func (g graphics) Run() {
 	win := newWindowGo(g)
 	var gamematrix []pixel.Matrix
 	var tiles []*pixel.Sprite
+	var errorMessageDisplayed bool
+	var errorMessage string
+	var errorDisplayTime time.Time
 
 	for !win.Closed() {
+		if errorMessageDisplayed && time.Since(errorDisplayTime) >= 3*time.Second {
+			errorMessageDisplayed = false
+			errorMessage = ""
+		}
+
 		win.Clear(colornames.Aliceblue)
 		g.drawBoardBackGround(win)
 		g.drawCrossesOnBoard(win)
+		// todo dray played times based on intersects state in the game in stead of adding them on click
 		g.drawPlayedTiles(tiles, win, gamematrix)
+
+		if errorMessageDisplayed {
+			g.drawErrorMessage(win, errorMessage, g.getErrorMessageMatrix(win))
+		}
 
 		if win.JustPressed(pixelgl.MouseButtonLeft) {
 			mousePosition := g.ValidMousePosition(win.MousePosition())
-			game.PlayTile(mousePosition.X, mousePosition.Y)
+
+			err := game.PlayTile(mousePosition.X, mousePosition.Y)
+			if err != nil {
+				// Show error message on board
+				errorMessage = "Invalid play: " + err.Error()
+				errorMessageDisplayed = true
+				errorDisplayTime = time.Now()
+			}
 			tiles = append(tiles, g.createTile(game))
 			gamematrix = append(gamematrix, g.getMousePixelMatrix(g.ValidMousePosition(mousePosition)))
 		}
@@ -105,7 +131,6 @@ func (g graphics) getColorForTurn(newGame game.GameGo) pixel.Picture {
 
 func (g graphics) NearestValidPosition(pos float64) float64 {
 	return float64(g.roundUpToNearestImageSize(int(pos)))
-
 }
 
 func (g graphics) roundUpToNearestImageSize(num int) int {
@@ -172,4 +197,43 @@ func (g graphics) ValidMousePosition(vec pixel.Vec) pixel.Vec {
 	yCor := g.NearestValidPosition(vec.Y)
 
 	return pixel.Vec{xCor, yCor}
+}
+
+func (g *graphics) drawErrorMessage(win *pixelgl.Window, message string, matrix pixel.Matrix) {
+	// Load a basic font and create an atlas for text rendering
+	basicAtlas := text.NewAtlas(basicfont.Face7x13, text.ASCII)
+
+	// Create a new text object with the loaded atlas
+	basicTxt := text.New(pixel.V(0, 0), basicAtlas)
+	basicTxt.Color = colornames.White
+
+	// Clear the text box
+	basicTxt.Clear()
+
+	// Write the message into the text box
+	fmt.Fprintln(basicTxt, message)
+
+	// Get the size of the text
+	textBounds := basicTxt.Bounds()
+
+	// Create a new IMDraw instance
+	imd := imdraw.New(nil)
+	imd.Color = colornames.Red
+
+	// Calculate the position for the background rectangle
+	rectangleMin := textBounds.Min.Sub(pixel.V(5, 5)).Add(matrix.Project(pixel.ZV))
+	rectangleMax := textBounds.Max.Add(pixel.V(5, 5)).Add(matrix.Project(pixel.ZV))
+
+	// Draw the background rectangle
+	imd.Push(rectangleMin, rectangleMax)
+	imd.Rectangle(0)
+	imd.Draw(win)
+
+	// Draw the text box to the window with the provided matrix
+	basicTxt.Draw(win, matrix)
+}
+
+func (g graphics) getErrorMessageMatrix(win *pixelgl.Window) pixel.Matrix {
+	windowCenter := win.Bounds().Center()
+	return pixel.IM.Moved(windowCenter)
 }

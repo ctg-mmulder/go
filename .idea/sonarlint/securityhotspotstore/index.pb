@@ -8,13 +8,7 @@
 :
 
 models.iml,7\9\79091f9afe4ead5427ac95b84467204f244b86f7
-6
-go.mod,c\4\c47645c391ad0571c40779079363c9d48412e18b
-D
-game/graphics/go.mod,5\d\5df0e8305dd5188c8aa9ea7608dbbfe0177afca7
 B
 game/models/go.mod,3\8\3888cc3739321afa774329dfbd9dd417f28f8fa8
-8
-game.iml,5\6\568ab3dfa71df438f25bad2393543091d4f8868f
 <
 graphics.iml,c\6\c61feed9ac14168a9414b47a878890bce88b1666
